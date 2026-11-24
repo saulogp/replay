@@ -34,7 +34,9 @@ export default function App() {
     document.title = song ? `${song.title} · Replay` : 'Replay'
   }, [song?.title]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => window.scrollTo(0, 0), [songId])
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [songId])
 
   return (
     <main className="app">

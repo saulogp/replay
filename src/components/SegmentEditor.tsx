@@ -29,7 +29,9 @@ function TimeField({
   max: number
 }) {
   const [text, setText] = useState(formatTime(value))
-  useEffect(() => setText(formatTime(value)), [value])
+  useEffect(() => {
+    setText(formatTime(value))
+  }, [value])
 
   const clamp = (v: number) => Math.min(max > 0 ? max : Infinity, Math.max(0, v))
   const commit = () => {

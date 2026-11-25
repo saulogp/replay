@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Capacitor } from '@capacitor/core'
-import { Check, ClipboardPaste, Copy, Download, FileUp, X } from 'lucide-react'
+import { ClipboardPaste, FileUp, X } from 'lucide-react'
 import type { LibraryApi } from '../lib/storage'
 import { normalize } from '../lib/storage'
+import { ExportActions } from './ExportActions'
 
 interface Props {
   api: LibraryApi
@@ -10,43 +10,27 @@ interface Props {
 }
 
 export function BackupDialog({ api, onClose }: Props) {
-  const [copied, setCopied] = useState(false)
   const [pasting, setPasting] = useState(false)
   const [text, setText] = useState('')
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
+  const [today] = useState(() => new Date().toISOString().slice(0, 10))
   const json = JSON.stringify(api.lib, null, 2)
-  const native = Capacitor.isNativePlatform()
   const total = api.lib.songs.reduce((n, s) => n + s.segments.length, 0)
-
-  const download = () => {
-    const blob = new Blob([json], { type: 'application/json' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = `replay-backup-${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(a.href)
-  }
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(json)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      setMessage({ ok: false, text: 'Não foi possível copiar.' })
-    }
-  }
 
   const doImport = (raw: string) => {
     try {
       const data = normalize(JSON.parse(raw))
       if (data.songs.length === 0) throw new Error('vazio')
       api.importLibrary(data)
-      setMessage({ ok: true, text: `${data.songs.length} música(s) importada(s).` })
+      const text =
+        data.songs.length === 1
+          ? `"${data.songs[0].title}" importada.`
+          : `${data.songs.length} músicas importadas.`
+      setMessage({ ok: true, text })
       setPasting(false)
       setText('')
     } catch {
-      setMessage({ ok: false, text: 'Esse conteúdo não é um backup válido do Replay.' })
+      setMessage({ ok: false, text: 'Esse conteúdo não é um backup nem uma música exportada do Replay.' })
     }
   }
 
@@ -63,23 +47,17 @@ export function BackupDialog({ api, onClose }: Props) {
         <p className="hint">
           Suas músicas ficam salvas neste aparelho. Use o backup para levar seus{' '}
           {api.lib.songs.length} música(s) e {total} trecho(s) para outro navegador ou para o
-          celular.
+          celular. Para exportar uma música só, abra a música e toque em compartilhar.
         </p>
 
         <h3 className="sub">Exportar</h3>
-        <div className="btn-row">
-          {!native && (
-            <button className="btn btn-soft" onClick={download}>
-              <Download size={18} /> Baixar arquivo
-            </button>
-          )}
-          <button className="btn btn-soft" onClick={copy}>
-            {copied ? <Check size={18} /> : <Copy size={18} />} {copied ? 'Copiado!' : 'Copiar texto'}
-          </button>
-        </div>
+        <ExportActions json={json} filename={`replay-backup-${today}`} />
 
         <h3 className="sub">Importar</h3>
-        <p className="hint">Músicas que você já tem recebem só os trechos novos.</p>
+        <p className="hint">
+          Aceita um backup completo ou uma música exportada. Músicas que você já tem recebem só os
+          trechos novos.
+        </p>
         <div className="btn-row">
           <label className="btn btn-soft">
             <FileUp size={18} /> Abrir arquivo
@@ -105,7 +83,7 @@ export function BackupDialog({ api, onClose }: Props) {
               rows={5}
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Cole aqui o texto do backup"
+              placeholder="Cole aqui o texto do backup ou da música"
             />
             <button className="btn btn-primary" disabled={!text.trim()} onClick={() => doImport(text)}>
               Importar

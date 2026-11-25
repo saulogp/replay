@@ -11,7 +11,7 @@ das partes que quer praticar, escolha quantas vezes repetir e a velocidade.
 - Contagem regressiva global (liga/desliga, 1–8 s, com bip opcional) antes do trecho e entre repetições
 - Marcação rápida "Marcar início → Marcar fim" enquanto o vídeo toca
 - Linha do tempo com os trechos coloridos (toque para tocar / arraste para navegar)
-- Tudo salvo no aparelho (localStorage) + backup/importação em JSON
+- Tudo salvo no aparelho (localStorage) + backup/importação em JSON (da biblioteca toda ou de uma música só)
 - Atalho no computador: **espaço** = tocar/pausar
 
 ## Rodar na web

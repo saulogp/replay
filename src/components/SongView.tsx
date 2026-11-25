@@ -12,6 +12,7 @@ import {
   Play,
   Plus,
   Repeat,
+  Share2,
   SlidersHorizontal,
   RotateCcw,
   RotateCw,
@@ -29,6 +30,7 @@ import { useYouTubePlayer } from '../lib/useYouTubePlayer'
 import { Timeline } from './Timeline'
 import { SegmentEditor } from './SegmentEditor'
 import { CountdownSetting } from './CountdownSetting'
+import { SongExportDialog } from './SongExportDialog'
 
 interface Props {
   song: Song
@@ -60,6 +62,7 @@ export function SongView({ song, api, onBack }: Props) {
   const [editing, setEditing] = useState<{ seg: Segment; isNew: boolean } | null>(null)
   const [editingTitle, setEditingTitle] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showExport, setShowExport] = useState(false)
 
   const settings = api.lib.settings
   const settingsRef = useRef(settings)
@@ -339,6 +342,14 @@ export function SongView({ song, api, onBack }: Props) {
           )}
           {song.author && !editingTitle && <span className="topbar-sub">{song.author}</span>}
         </div>
+        <button
+          className="icon-btn"
+          onClick={() => setShowExport(true)}
+          aria-label="Exportar música"
+          title="Exportar música"
+        >
+          <Share2 size={20} />
+        </button>
       </header>
 
       <div className="song-layout">
@@ -685,6 +696,7 @@ export function SongView({ song, api, onBack }: Props) {
           onDelete={editing.isNew ? undefined : () => deleteSegment(editing.seg)}
         />
       )}
+      {showExport && <SongExportDialog song={song} onClose={() => setShowExport(false)} />}
     </div>
   )
 }
